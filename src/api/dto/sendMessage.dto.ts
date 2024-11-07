@@ -92,6 +92,8 @@ export class SendStickerDto extends Metadata {
 
 export class SendAudioDto extends Metadata {
   audio: string;
+  waveform?: number[]; // Adiciona a propriedade waveform
+
 }
 
 export type TypeButton = 'reply' | 'copy' | 'url' | 'call' | 'pix';
