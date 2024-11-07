@@ -468,34 +468,45 @@ export class EvolutionStartupService extends ChannelStartupService {
     return prepareMedia;
   }
 
-  public async audioWhatsapp(data: SendAudioDto, file?: any, isIntegration = false) {
+public async audioWhatsapp(data: SendAudioDto, file?: any, isIntegration = false) {
     const mediaData: SendAudioDto = { ...data };
 
+    // Verifica se existem dados do arquivo e realiza a conversão para base64
     if (file?.buffer) {
-      mediaData.audio = file.buffer.toString('base64');
+        mediaData.audio = file.buffer.toString('base64');
     } else {
-      console.error('El archivo o buffer no est� definido correctamente.');
-      throw new Error('File or buffer is undefined.');
+        console.error('El archivo o buffer no está definido correctamente.');
+        throw new Error('File or buffer is undefined.');
     }
 
+    // Se o campo waveform estiver presente, adicione ao mediaData
+    if (data.waveform) {
+        mediaData.waveform = data.waveform; // Adiciona o waveform ao mediaData
+    }
+
+    // Processa o áudio e obtém a mensagem formatada
     const message = await this.processAudio(mediaData.audio, data.number);
 
+    // Envia a mensagem, incluindo o waveform se estiver presente
     const audioSent = await this.sendMessageWithTyping(
-      data.number,
-      { ...message },
-      {
-        delay: data?.delay,
-        presence: 'composing',
-        quoted: data?.quoted,
-        linkPreview: data?.linkPreview,
-        mentionsEveryOne: data?.mentionsEveryOne,
-        mentioned: data?.mentioned,
-      },
-      isIntegration,
+        data.number,
+        {
+            ...message,
+            waveform: mediaData.waveform, // Inclui o parâmetro de waveform na mensagem
+        },
+        {
+            delay: data?.delay,
+            presence: 'composing',
+            quoted: data?.quoted,
+            linkPreview: data?.linkPreview,
+            mentionsEveryOne: data?.mentionsEveryOne,
+            mentioned: data?.mentioned,
+        },
+        isIntegration,
     );
 
     return audioSent;
-  }
+}
 
   public async buttonMessage() {
     throw new BadRequestException('Method not available on Evolution Channel');
